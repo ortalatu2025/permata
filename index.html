@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voting Agen Perubahan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0B2545;
+  --navy-2:#123162;
+  --ink:#16212E;
+  --paper:#F3F6F8;
+  --surface:#FFFFFF;
+  --teal:#0F766E;
+  --teal-dark:#0B5A54;
+  --gold:#C9922B;
+  --line:#DDE4E9;
+  --muted:#5B6B7A;
+  --radius:14px;
+  --shadow: 0 8px 24px -12px rgba(11,37,69,0.25);
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter', system-ui, sans-serif;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2{ font-family:'Fraunces', Georgia, serif; margin:0; }
+.wrap{ max-width:1080px; margin:0 auto; padding:0 24px; }
+
+a{ color:var(--teal); }
+
+/* ---------- header ---------- */
+.site-header{ background:var(--navy); color:#fff; }
+.header-inner{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 24px;
+}
+.brand{ display:flex; align-items:center; gap:10px; font-weight:600; letter-spacing:.2px; }
+.brand-mark{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:50%;
+  background:var(--gold); color:var(--navy);
+  font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:13px;
+}
+.period-chip{
+  font-size:12.5px; font-family:'IBM Plex Mono', monospace;
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25);
+  padding:6px 12px; border-radius:999px; color:#DCEAE8;
+}
+
+/* ---------- hero ---------- */
+.hero{
+  background:linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
+  color:#fff;
+  padding:56px 0 72px;
+  position:relative;
+}
+.hero-inner{ max-width:720px; }
+.eyebrow{
+  font-family:'IBM Plex Mono', monospace; text-transform:uppercase;
+  letter-spacing:.14em; font-size:12px; color:var(--gold); margin:0 0 14px;
+}
+.hero h1{ font-size:clamp(30px, 4.2vw, 46px); font-weight:600; line-height:1.15; color:#fff; }
+.hero-desc{ color:#C7D3DE; font-size:16px; margin:18px 0 0; max-width:56ch; }
+.hero-stats{ display:flex; gap:36px; margin-top:34px; }
+.stat{ display:flex; flex-direction:column; }
+.stat-num{ font-family:'Fraunces', serif; font-size:32px; font-weight:600; color:var(--gold); }
+.stat-label{ font-size:13px; color:#AEC0CF; margin-top:2px; }
+
+/* ---------- voter bar ---------- */
+.voter-bar{
+  margin-top:-34px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:16px 20px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  flex-wrap:wrap;
+  position:relative; z-index:2;
+}
+.voter-bar-text{ font-size:14.5px; color:var(--muted); }
+.voter-bar.verified{ border-left:4px solid var(--teal); }
+.voter-bar.verified .voter-bar-text{ color:var(--ink); font-weight:500; }
+
+.status-msg{
+  margin-top:18px; padding:13px 16px; border-radius:10px;
+  font-size:14.5px; font-weight:500;
+}
+.status-msg.ok{ background:#E7F5F1; color:var(--teal-dark); border:1px solid #BFE3D9; }
+.status-msg.error{ background:#FBEAEA; color:#9A2B2B; border:1px solid #F1C6C6; }
+
+/* ---------- loading / empty ---------- */
+.loading-state{ display:flex; flex-direction:column; align-items:center; gap:14px; padding:60px 0; color:var(--muted); }
+.spinner{
+  width:28px; height:28px; border-radius:50%;
+  border:3px solid var(--line); border-top-color:var(--teal);
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+.empty-state{ padding:60px 0; text-align:center; color:var(--muted); }
+
+/* ---------- agent grid ---------- */
+.agent-grid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(268px, 1fr));
+  gap:22px; margin:28px 0 60px;
+}
+
+.agent-card{
+  background:var(--surface);
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  overflow:hidden;
+  box-shadow:0 1px 2px rgba(16,24,32,0.04);
+  transition:transform .18s ease, box-shadow .18s ease;
+  display:flex; flex-direction:column;
+  animation:riseIn .4s ease both;
+}
+.agent-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow); }
+@keyframes riseIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+
+.agent-photo-wrap{ position:relative; aspect-ratio:4/3; background:#E7ECEF; overflow:hidden; }
+.agent-photo-wrap img{ width:100%; height:100%; object-fit:cover; display:block; }
+.agent-num{
+  position:absolute; top:10px; left:10px;
+  background:rgba(11,37,69,0.82); color:#fff;
+  font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600;
+  padding:3px 9px; border-radius:999px;
+}
+
+/* perforated ballot-stub divider */
+.perforation{
+  height:14px; position:relative;
+  background:
+    radial-gradient(circle 5px at 0 50%, transparent 5px, var(--surface) 5.5px),
+    radial-gradient(circle 5px at 100% 50%, transparent 5px, var(--surface) 5.5px),
+    repeating-linear-gradient(90deg, transparent 0 8px, var(--line) 8px 9px, transparent 9px 17px);
+  background-color:#E7ECEF;
+}
+
+.agent-body{ padding:18px 18px 20px; display:flex; flex-direction:column; gap:10px; flex:1; }
+.agent-name{ font-family:'Fraunces', serif; font-size:19px; font-weight:600; line-height:1.25; }
+.agent-nip{
+  font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--muted);
+  letter-spacing:.03em;
+}
+.agent-proposal-link{
+  font-size:13.5px; font-weight:600; color:var(--teal);
+  text-decoration:none; display:inline-flex; align-items:center; gap:5px;
+}
+.agent-proposal-link:hover{ text-decoration:underline; }
+
+.agent-footer{ margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:8px; }
+.vote-count{ font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--muted); }
+
+/* ---------- buttons ---------- */
+.btn{
+  font-family:'Inter', sans-serif; font-size:14px; font-weight:600;
+  padding:10px 16px; border-radius:9px; border:1px solid transparent;
+  cursor:pointer; transition:transform .12s ease, background .15s ease, opacity .15s ease;
+}
+.btn:active{ transform:scale(0.97); }
+.btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+.btn-primary{ background:var(--teal); color:#fff; }
+.btn-primary:hover{ background:var(--teal-dark); }
+.btn-primary:disabled{ background:#B9C3CB; cursor:not-allowed; }
+.btn-outline{ background:transparent; border-color:var(--teal); color:var(--teal); }
+.btn-outline:hover{ background:#EAF5F3; }
+.btn-ghost{ background:transparent; color:var(--muted); border-color:var(--line); }
+.btn-ghost:hover{ background:#F0F3F5; }
+
+.vote-btn{ width:100%; justify-content:center; display:flex; align-items:center; gap:6px; }
+.vote-btn.voted{ background:var(--gold); color:var(--navy); }
+.vote-btn.voted::before{ content:"✓"; font-weight:700; }
+
+/* ---------- footer ---------- */
+.site-footer{ border-top:1px solid var(--line); padding:22px 0 40px; color:var(--muted); font-size:13px; }
+
+/* ---------- modal ---------- */
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(11,21,33,0.55);
+  display:flex; align-items:center; justify-content:center; padding:20px; z-index:50;
+}
+.modal{
+  background:var(--surface); border-radius:16px; padding:26px 26px 22px;
+  width:100%; max-width:380px; box-shadow:0 20px 50px -12px rgba(0,0,0,0.35);
+  animation:pop .18s ease both;
+}
+[hidden] {
+  display: none !important;
+}
+@keyframes pop{ from{ opacity:0; transform:scale(.96); } to{ opacity:1; transform:scale(1); } }
+.modal h2{ font-size:20px; }
+.modal-desc{ color:var(--muted); font-size:14px; margin:10px 0 16px; }
+.modal label{ font-size:13px; font-weight:600; display:block; margin-bottom:6px; }
+.modal input{
+  width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line);
+  font-family:'IBM Plex Mono', monospace; font-size:14px; margin-bottom:6px;
+}
+.modal input:focus-visible{ outline:2px solid var(--teal); outline-offset:1px; }
+.modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+.confirm-name{ font-family:'Fraunces', serif; font-size:20px; font-weight:600; margin:4px 0 0; }
+.confirm-note{ font-size:12.5px; color:var(--muted); margin-top:10px; }
+
+@media (max-width:560px){
+  .header-inner{ flex-direction:column; align-items:flex-start; gap:10px; }
+  .hero{ padding:44px 0 60px; }
+  .voter-bar{ flex-direction:column; align-items:flex-start; }
+}
+
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <div class="brand">
+      <span class="brand-mark">AP</span>
+      <span class="brand-text">Voting Agen Perubahan</span>
+    </div>
+    <div class="period-chip" id="periodChip">Voting periode 2026 sedang berlangsung</div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <p class="eyebrow">Surat Suara Digital</p>
+    <h1>Pilih Agen Perubahan<br>pilihan Anda.</h1>
+    <p class="hero-desc">Setiap agen perubahan mengajukan proposal perubahan. Baca proposalnya, lalu berikan satu suara untuk agen perubahan yang menurut Anda paling layak membawa perubahan.</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-num" id="statAgents">–</span>
+        <span class="stat-label">Agen Perubahan terdaftar</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" id="statVotes">–</span>
+        <span class="stat-label">Suara masuk</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <div id="voterBar" class="voter-bar">
+    <span class="voter-bar-text">Masukkan NIP Anda untuk mulai memilih.</span>
+    <button id="voterBtn" class="btn btn-outline">Isi Identitas</button>
+  </div>
+
+  <div id="statusMsg" class="status-msg" hidden></div>
+
+  <div id="loadingState" class="loading-state">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Memuat daftar agen perubahan…</p>
+  </div>
+
+  <div id="agentGrid" class="agent-grid" hidden></div>
+
+  <div id="emptyState" class="empty-state" hidden>
+    <p>Belum ada data agen perubahan. Silakan lengkapi sheet <strong>Agents</strong></p>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>&copy; 2026 Kantor Wilayah Kementerian Agama Provinsi DKI Jakarta. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- Modal: identitas pemilih -->
+<div id="voterModal" class="modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="voterModalTitle">
+    <h2 id="voterModalTitle">Identitas Pemilih</h2>
+    <p class="modal-desc">Masukkan NIP Anda</p>
+    <label for="voterNipInput">NIP</label>
+    <input type="text" id="voterNipInput" placeholder="Contoh: 190001011900011005" inputmode="numeric">
+    <div class="modal-actions">
+      <button id="voterCancelBtn" class="btn btn-ghost">Batal</button>
+      <button id="voterSaveBtn" class="btn btn-primary">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: konfirmasi vote -->
+<div id="confirmModal" class="modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+    <h2 id="confirmModalTitle">Konfirmasi Pilihan</h2>
+    <p class="modal-desc">Anda akan memberikan suara untuk:</p>
+    <p class="confirm-name" id="confirmAgentName">–</p>
+    <p class="confirm-note">Pilihan tidak dapat diubah setelah dikirim.</p>
+    <div class="modal-actions">
+      <button id="confirmCancelBtn" class="btn btn-ghost">Batal</button>
+      <button id="confirmSendBtn" class="btn btn-primary">Kirim Suara</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const CONFIG = {
+  SHEET_ID: "1cGb-fmrLOKp_NJGis9bhULdE6xYMaxe6FxprpsrCf20",
+  AGENTS_SHEET: "Agents",
+  VOTES_SHEET: "Votes",
+  FORM_ACTION_URL: "https://docs.google.com/forms/d/e/1FAIpQLSdZq_uLuOtcGWjd7U8Ebj3L0YQ-xWXbcLemCJWYIZgabtU8Bw/formResponse",
+  ENTRY_NIP: "entry.1478650977",
+  ENTRY_AGENT_ID: "entry.914290983",
+  ENTRY_AGENT_NAME: "",
+};
+
+const LS_VOTER_KEY = "agenPerubahan_voterNip";
+const LS_VOTED_KEY = "agenPerubahan_hasVoted";
+
+const els = {
+  loading: document.getElementById("loadingState"),
+  grid: document.getElementById("agentGrid"),
+  empty: document.getElementById("emptyState"),
+  statusMsg: document.getElementById("statusMsg"),
+  statAgents: document.getElementById("statAgents"),
+  statVotes: document.getElementById("statVotes"),
+  voterBar: document.getElementById("voterBar"),
+  voterBarText: document.querySelector(".voter-bar-text"),
+  voterBtn: document.getElementById("voterBtn"),
+  voterModal: document.getElementById("voterModal"),
+  voterNipInput: document.getElementById("voterNipInput"),
+  voterSaveBtn: document.getElementById("voterSaveBtn"),
+  voterCancelBtn: document.getElementById("voterCancelBtn"),
+  confirmModal: document.getElementById("confirmModal"),
+  confirmAgentName: document.getElementById("confirmAgentName"),
+  confirmSendBtn: document.getElementById("confirmSendBtn"),
+  confirmCancelBtn: document.getElementById("confirmCancelBtn"),
+};
+
+let agentsCache = [];
+let votesCache = []; // [{nip, agentId}]
+let pendingAgent = null;
+
+init();
+
+async function init() {
+  bindVoterUI();
+  bindConfirmUI();
+  refreshVoterBar();
+  await loadAll();
+}
+
+/* ---------------- reading data from Google Sheets (no key needed) ---------------- */
+
+async function fetchSheetRows(sheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(
+    sheetName
+  )}&headers=1`;
+  const res = await fetch(url);
+  const text = await res.text();
+  const jsonStr = text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1);
+  const data = JSON.parse(jsonStr);
+  const rows = (data.table.rows || []).map((r) =>
+    (r.c || []).map((cell) => (cell && cell.v !== null && cell.v !== undefined ? cell.v : ""))
+  );
+  return rows;
+}
+
+async function fetchAgents() {
+  const rows = await fetchSheetRows(CONFIG.AGENTS_SHEET);
+  // urutan kolom: ID, Nama, NIP, FotoURL, ProposalURL
+  return rows
+    .filter((r) => r[0] !== "" && r[0] !== undefined)
+    .map((r) => ({
+      id: String(r[0]),
+      nama: r[1] || "",
+      nip: r[2] || "",
+      foto: r[3] || "",
+      proposal: r[4] || "",
+    }));
+}
+
+async function fetchVotes() {
+  const rows = await fetchSheetRows(CONFIG.VOTES_SHEET);
+  // kolom otomatis dari Form: Timestamp, NIP, AgentID, (AgentNama - opsional)
+  return rows
+    .filter((r) => r[1] !== "" && r[1] !== undefined)
+    .map((r) => ({ nip: String(r[1]).trim(), agentId: String(r[2]).trim() }));
+}
+
+async function loadAll() {
+  toggleLoading(true);
+  try {
+    const [agents, votes] = await Promise.all([fetchAgents(), fetchVotes()]);
+    agentsCache = agents;
+    votesCache = votes;
+
+    renderAgents(agentsCache);
+    els.statAgents.textContent = agentsCache.length;
+    els.statVotes.textContent = votesCache.length;
+
+    if (agentsCache.length === 0) {
+      els.empty.hidden = false;
+    }
+
+    syncVotedStateFromServer();
+  } catch (err) {
+    showStatus(
+      "Gagal memuat data. Pastikan Sheet sudah di-share 'Anyone with the link' dan CONFIG di bagian atas <script> file ini sudah benar.",
+      "error"
+    );
+    console.error(err);
+  } finally {
+    toggleLoading(false);
+  }
+}
+
+// Jika NIP tersimpan di browser ini ternyata sudah ada di sheet Votes,
+// pastikan status "sudah voting" konsisten (mis. dibuka di device lain).
+function syncVotedStateFromServer() {
+  const nip = localStorage.getItem(LS_VOTER_KEY);
+  if (!nip) return;
+  const already = votesCache.some((v) => v.nip.toLowerCase() === nip.toLowerCase());
+  if (already) {
+    localStorage.setItem(LS_VOTED_KEY, "1");
+    refreshVoterBar();
+  }
+}
+
+function toggleLoading(isLoading) {
+  els.loading.hidden = !isLoading;
+  els.grid.hidden = isLoading;
+}
+
+/* ---------------- rendering ---------------- */
+
+function toDirectImageUrl(url) {
+  if (!url) return url;
+  if (!url.includes("drive.google.com")) return url;
+  const match = url.match(/\/d\/([-\w]{10,})/) || url.match(/[?&]id=([-\w]{10,})/);
+  if (!match) return url;
+  return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+}
+
+function renderAgents(agents) {
+  els.grid.innerHTML = "";
+  const hasVoted = localStorage.getItem(LS_VOTED_KEY) === "1";
+
+  agents.forEach((agent, idx) => {
+    const card = document.createElement("article");
+    card.className = "agent-card";
+    card.style.animationDelay = `${idx * 40}ms`;
+
+    const photoSrc = toDirectImageUrl(agent.foto || "");
+    const proposalHref = agent.proposal || "#";
+
+    card.innerHTML = `
+      <div class="agent-photo-wrap">
+        <span class="agent-num">#${String(idx + 1).padStart(2, "0")}</span>
+        <img src="${photoSrc}" alt="Foto ${agent.nama}" loading="lazy"
+          onerror="this.src='https://placehold.co/400x300?text=Foto+Tidak+Tersedia'">
+      </div>
+      <div class="perforation"></div>
+      <div class="agent-body">
+        <h3 class="agent-name">${agent.nama}</h3>
+        <p class="agent-nip">NIP. ${agent.nip || "-"}</p>
+        <a class="agent-proposal-link" href="${proposalHref}" target="_blank" rel="noopener">
+          Lihat proposal ↗
+        </a>
+        <div class="agent-footer">
+          <button class="btn btn-primary vote-btn" data-id="${agent.id}" ${hasVoted ? "disabled" : ""}>
+            ${hasVoted ? "Terima kasih" : "Pilih Agen Perubahan Ini"}
+          </button>
+        </div>
+      </div>
+    `;
+    els.grid.appendChild(card);
+  });
+
+  els.grid.hidden = false;
+  els.grid.querySelectorAll(".vote-btn").forEach((btn) => {
+    btn.addEventListener("click", () => onVoteClick(btn.dataset.id));
+  });
+}
+
+/* ---------------- voter identity ---------------- */
+
+function bindVoterUI() {
+  els.voterBtn.addEventListener("click", () => {
+    els.voterNipInput.value = localStorage.getItem(LS_VOTER_KEY) || "";
+    els.voterModal.hidden = false;
+    els.voterNipInput.focus();
+  });
+  els.voterCancelBtn.addEventListener("click", () => (els.voterModal.hidden = true));
+  els.voterModal.addEventListener("click", (e) => {
+    if (e.target === els.voterModal) els.voterModal.hidden = true;
+  });
+  els.voterSaveBtn.addEventListener("click", () => {
+    const nip = els.voterNipInput.value.trim();
+    if (!nip) {
+      els.voterNipInput.focus();
+      return;
+    }
+    localStorage.setItem(LS_VOTER_KEY, nip);
+    els.voterModal.hidden = true;
+    refreshVoterBar();
+    syncVotedStateFromServer();
+  });
+}
+
+function refreshVoterBar() {
+  const nip = localStorage.getItem(LS_VOTER_KEY);
+  const hasVoted = localStorage.getItem(LS_VOTED_KEY) === "1";
+  if (nip) {
+    els.voterBar.classList.add("verified");
+    els.voterBarText.textContent = hasVoted
+      ? `Suara dari NIP ${nip} sudah tercatat. Terima kasih sudah memilih.`
+      : `Anda masuk sebagai NIP ${nip}.`;
+    els.voterBtn.textContent = "Ganti NIP";
+  } else {
+    els.voterBar.classList.remove("verified");
+    els.voterBarText.textContent = "Masukkan NIP Anda untuk mulai memilih.";
+    els.voterBtn.textContent = "Isi NIP";
+  }
+}
+
+/* ---------------- voting flow ---------------- */
+
+function onVoteClick(agentId) {
+  const nip = localStorage.getItem(LS_VOTER_KEY);
+  if (!nip) {
+    showStatus("Isi NIP Anda terlebih dahulu sebelum memilih.", "error");
+    els.voterBtn.click();
+    return;
+  }
+  if (localStorage.getItem(LS_VOTED_KEY) === "1") {
+    showStatus("Anda sudah memberikan suara sebelumnya.", "error");
+    return;
+  }
+  pendingAgent = agentsCache.find((a) => String(a.id) === String(agentId));
+  if (!pendingAgent) return;
+  els.confirmAgentName.textContent = pendingAgent.nama;
+  els.confirmModal.hidden = false;
+}
+
+function bindConfirmUI() {
+  els.confirmCancelBtn.addEventListener("click", () => {
+    els.confirmModal.hidden = true;
+    pendingAgent = null;
+  });
+  els.confirmSendBtn.addEventListener("click", submitVote);
+
+  els.confirmModal.addEventListener("click", (e) => {
+    if (e.target === els.confirmModal && !els.confirmSendBtn.disabled) {
+      els.confirmModal.hidden = true;
+      pendingAgent = null;
+    }
+  });
+}
+
+// Tombol Escape menutup modal mana pun yang sedang terbuka
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (!els.confirmModal.hidden && !els.confirmSendBtn.disabled) {
+    els.confirmModal.hidden = true;
+    pendingAgent = null;
+  }
+  if (!els.voterModal.hidden) {
+    els.voterModal.hidden = true;
+  }
+});
+
+async function submitVote() {
+  if (!pendingAgent) return;
+  const nip = localStorage.getItem(LS_VOTER_KEY);
+
+  els.confirmSendBtn.disabled = true;
+  els.confirmSendBtn.textContent = "Memeriksa…";
+
+  try {
+    // Cek ulang ke server tepat sebelum kirim, untuk mengurangi risiko vote ganda
+    const freshVotes = await fetchVotes();
+    if (freshVotes.some((v) => v.nip.toLowerCase() === nip.toLowerCase())) {
+      localStorage.setItem(LS_VOTED_KEY, "1");
+      els.confirmModal.hidden = true;
+      showStatus("NIP ini sudah tercatat pernah memilih sebelumnya.", "error");
+      refreshVoterBar();
+      await loadAll();
+      return;
+    }
+
+    els.confirmSendBtn.textContent = "Mengirim…";
+    await postVoteToForm(nip, pendingAgent.id, pendingAgent.nama);
+
+    // Google Form dikirim dengan mode "no-cors" sehingga respons tidak bisa dibaca.
+    // Untuk memastikan, kita cek ulang beberapa kali sampai data muncul di sheet.
+    const confirmed = await pollVoteRecorded(nip, 6, 1200);
+
+    els.confirmModal.hidden = true;
+    if (confirmed) {
+      localStorage.setItem(LS_VOTED_KEY, "1");
+      showStatus(`Suara untuk ${pendingAgent.nama} berhasil disimpan. Terima kasih!`, "ok");
+    } else {
+      showStatus(
+        "Suara sudah dikirim, tapi belum bisa diverifikasi otomatis. Muat ulang halaman sesaat lagi untuk memastikan.",
+        "error"
+      );
+    }
+    refreshVoterBar();
+    await loadAll();
+  } catch (err) {
+    els.confirmModal.hidden = true;
+    showStatus("Terjadi kesalahan saat mengirim suara. Coba lagi.", "error");
+    console.error(err);
+  } finally {
+    pendingAgent = null;
+    els.confirmSendBtn.disabled = false;
+    els.confirmSendBtn.textContent = "Kirim Suara";
+  }
+}
+
+async function postVoteToForm(nip, agentId, agentName) {
+  const params = new URLSearchParams();
+  params.append(CONFIG.ENTRY_NIP, nip);
+  params.append(CONFIG.ENTRY_AGENT_ID, agentId);
+  if (CONFIG.ENTRY_AGENT_NAME) params.append(CONFIG.ENTRY_AGENT_NAME, agentName);
+
+  await fetch(CONFIG.FORM_ACTION_URL, {
+    method: "POST",
+    mode: "no-cors", // Google Form tidak mengizinkan CORS; respons jadi "opaque"
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+}
+
+async function pollVoteRecorded(nip, attempts, delayMs) {
+  for (let i = 0; i < attempts; i++) {
+    await sleep(delayMs);
+    try {
+      const votes = await fetchVotes();
+      if (votes.some((v) => v.nip.toLowerCase() === nip.toLowerCase())) {
+        votesCache = votes;
+        return true;
+      }
+    } catch (e) {
+      // abaikan, coba lagi
+    }
+  }
+  return false;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/* ---------------- helpers ---------------- */
+
+function showStatus(message, type) {
+  els.statusMsg.textContent = message;
+  els.statusMsg.className = `status-msg ${type}`;
+  els.statusMsg.hidden = false;
+  els.statusMsg.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  clearTimeout(showStatus._t);
+  showStatus._t = setTimeout(() => (els.statusMsg.hidden = true), 7000);
+}
+
+function escapeHtml(str = "") {
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
+function escapeAttr(str = "") {
+  return escapeHtml(str);
+}
+
+</script>
+</body>
+</html>
